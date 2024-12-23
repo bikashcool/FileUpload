@@ -5,7 +5,10 @@ const fileSchema = new mongoose.Schema({
     name: {
         type: String, 
         required: true,
-    }, 
+    },
+    url: {
+        type: String,
+    },
     tags: {
         type: String,
     },
@@ -25,8 +28,9 @@ fileSchema.post("save", async function (doc){
             from: `bikashcool481@gmail.com`,
             to: doc.email,
             subject: "New file Uploaded in Cloudinary",
-            html: `<h2>Hey ${doc.name}</h2> <p>File has been successfully uploaded</p>
-                <p>View Here: <a href="${doc.url}">${doc.url}</a></p> 
+            html: `<h2>Hey ${doc.name}</h2>
+                   <p>File has been successfully uploaded</p>
+                   <p>View Here: <a href="${doc.url}">${doc.url}</a></p> 
             `,
         });
 
