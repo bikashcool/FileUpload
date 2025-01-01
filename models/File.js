@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-// const nodemailer = require("../config/nodemailer");
+const nodemailer = require("../config/nodemailer");
 
 const fileSchema = new mongoose.Schema({
     name: {
@@ -10,7 +10,7 @@ const fileSchema = new mongoose.Schema({
         type: String,
     },
     tags: {
-        type: String,
+        type: String, 
     },
     email: {
         type: String,
