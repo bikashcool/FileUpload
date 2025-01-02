@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-exports.connnect = () => {
+exports.connect = () => {
     try{
         let transporter = nodemailer.createTransport({
             host: process.env.MAIL_HOST,

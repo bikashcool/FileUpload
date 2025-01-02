@@ -51,6 +51,7 @@ async function uploadFileToCloudinary(file, folder, quality){
     };
 
     console.log("temp file path", file.tempFilePath);
+    options.resource_type = "auto";
     if(quality){
         options.quality = quality;
     }
@@ -88,7 +89,7 @@ exports.imageUpload = async (req, res) => {
             name,
             tags,
             email, 
-            url: response.secure_url,
+            imageUrl: response.secure_url,
         });
 
         res.json({
@@ -107,15 +108,25 @@ exports.imageUpload = async (req, res) => {
 
 exports.videoUpload = async (req, res) => {
   try {
+    console.log("Request Body:", req.body);
+    console.log("Uploaded File:", req.files);
+
     const { name, tags, email } = req.body;
-    console.log(name, tags, email);
+
+    if (!req.files || !req.files.videoFile) {
+      return res.status(400).json({
+        success: false,
+        message: "No video file uploaded",
+      });
+    }
 
     const file = req.files.videoFile;
 
-    // validation
+    // Validate file type
     const supportedTypes = ["mp4", "mov"];
     const fileType = file.name.split(".")[1].toLowerCase();
-    console.log("File Type: ", fileType);
+    console.log("File Name:", file.name);
+    console.log("File Type:", fileType);
 
     if (!isFileTypeSupported(fileType, supportedTypes)) {
       return res.status(400).json({
@@ -124,20 +135,20 @@ exports.videoUpload = async (req, res) => {
       });
     }
 
-    // add a upper limit of 5mb for Video
+    // Validate file size
     const fileSize = file.size;
-    if(isLargeFile(fileSize)){
-        return res.status(400).json({
-            success: false,
-            message: "Must be less than 5MB"
-        })
+    console.log("File Size (bytes):", fileSize);
+    if (isLargeFile(fileSize)) {
+      return res.status(400).json({
+        success: false,
+        message: "File must be less than 5MB",
+      });
     }
 
-
-    // file format is supported
-    console.log("Uploading to Cloudinary");
+    // Upload to Cloudinary
+    console.log("Uploading to Cloudinary...");
     const response = await uploadFileToCloudinary(file, "TestFolder");
-    console.log(response);
+    console.log("Cloudinary Response:", response);
 
     const fileData = await File.create({
       name,
@@ -152,10 +163,10 @@ exports.videoUpload = async (req, res) => {
       message: "Video Successfully Uploaded",
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error in videoUpload:", error);
     res.status(400).json({
       success: false,
-      message: "Something went Wrong",
+      message: error.message || "Something went Wrong",
     });
   }
 };
@@ -166,7 +177,7 @@ exports.imageSizeReducer = async(req, res) => {
         const {name, tags, email} = req.body;
         console.log(name, tags, email);
 
-        const file = req.file.imageFile;
+        const file = req.files.imageFile;
         console.log(file);
 
         // validation
@@ -194,7 +205,7 @@ exports.imageSizeReducer = async(req, res) => {
         const response = await uploadFileToCloudinary(file, "TestFolder", 60);
         console.log(response);
 
-        const fileData = await file.create({
+        const fileData = await File.create({
             name, 
             tags, 
             email,
